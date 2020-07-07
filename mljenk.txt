@@ -1,0 +1,63 @@
+cp -rvf * /root/mytask2
+cd /root/mytask2/
+if cat *.* | grep html
+then
+grep -l html -H *.* | xargs cp -t /root/mytask2/html_files
+fi
+if cat *.* | grep php
+then
+grep -l php -H *.* | xargs cp -t /root/mytask2/php_files
+fi
+-------------------------------------
+var="0"
+#to run docker container 
+if[["$(ls/root/mytask2/html_files/|sudo wc -l)"!="$var"]]
+then 
+sudo cho "true"
+sudo docker run -dit -p81:80 -v /root/mytask2/html_files/:/usr/local/apache2/htdocs/ --name myhtmlos httpd
+fi
+
+if[["$(ls/root/mytask2/php_files/|sudo wc -l)"!="$var"]]
+then 
+sudo cho "true"
+sudo docker run -dit -p81:80 -v /root/mytask2/php_files/:/usr/local/apache2/htdocs/ --name myphpos vimal13/apache-webserver-php
+fi
+---------------------------------------
+var="200"
+#check for html site 
+if docker ps -a | grep myhtmlos 
+then 
+status =$(curl -l http://:81/mljenk2.html|head -n 1 |cut -d$'' -f2)
+if [["$status"!="$var"]]
+then
+exit 0
+else
+exit 1 
+fi
+fi
+
+#check for php site 
+if docker ps -a | grep myphpos 
+then 
+status =$(curl -l http://:81/|head -n 1 |cut -d$'' -f2)
+if [["$status"!="$var"]]
+then
+exit 0
+else
+exit 1 
+fi
+fi
+----------------------------------------
+if docker ps -a |grep myhtmlos
+then 
+exit 0
+else 
+sudo docker run -dit -p81:80 -v /root/mytask2/html_files/:/usr/local/apache2/htdocs/ --name myhtmlos httpd
+fi
+
+if docker ps -a | grep myphpos
+then 
+exit 0 
+else 
+sudo docker run -dit -p81:80 -v /root/mytask2/php_files/:/usr/local/apache2/htdocs/ --name myphpos vimal13/apache-webserver-php
+fi
